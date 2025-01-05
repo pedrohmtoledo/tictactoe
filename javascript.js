@@ -1,7 +1,7 @@
 // first create the board. it is a 3x3 cells, each cell hast a row number and a column number
 
 function gameBoard() {
-    const size = 3;
+    const size = 3
     const board =[];
     const row =[];
 
@@ -14,14 +14,29 @@ function gameBoard() {
     return board
  
 };
+
+console.log(gameBoard())
 // function to create a player
-function createPlayer(name, token){
-    const getName = () => {return name};
+function createPlayer(player1 = "player1", player2 = "player2"){
+    const players = [
+        {
+            name: player1,
+            token: "X"
+        },
+        {
+            name: player2,
+            token: "O"
+        }
+    ]
 
-    const getToken = () => {return token};
+    const getName = (i) => {return players[i].name};
 
-    return { getName, getToken}
+    const getToken = (i) => {return players[i].token};
+
+    return { players, getToken, getName}
 };
+
+
 
 // update players moves to the board
 function playerMove(token, choice, board){
@@ -54,18 +69,19 @@ function checkForWinner(board) {
         else {
             return false
         }
-
     }
-
 }
 
 function choice(row, column) {
     let cell = [];
+
     cell.push(row);
     cell.push(column);
+
     return cell;
 }
 
+// this function is responsible for changings turns and get which players has to play
 function playersTurn(pl1, pl2){
     let activePlayer = pl1;
     let player1 = pl1;
@@ -89,28 +105,13 @@ function playersTurn(pl1, pl2){
 
 
 
-
 const ticTacToe = (function gameControl() {
     let board = gameBoard();
-    console.log(board)
-    let player1 = createPlayer(prompt("first player will be X"), "X");
-    let player2 = createPlayer(prompt("second player will be O"), "O");
+   
+    const players = createPlayer()
     
+    activePlayer = playersTurn(players.players[0], players.players[1]);
 
-    const players = [
-        {
-            name: player1.getName(),
-            token: player1.getToken()
-        },
-        {
-            name: player2.getName(),
-            token: player2.getToken()
-        }
-    ]
-
-    activePlayer = playersTurn(players[0], players[1]);
-    console.log(activePlayer.getActivePlayer());
-    console.log(activePlayer.getActivePlayer().token)
     while(!checkForWinner(board)){
         let row;
         let column;
@@ -124,11 +125,38 @@ const ticTacToe = (function gameControl() {
         checkForWinner(board);
 
         activePlayer.changeActivePlayer();
-
-
     }
+});
+
+// eventlistener when a cell is clicked, get that cell row and columns and place on players move funciton
 
 
-})();
+// create a function to transfor id number in column and row
 
+function idToRowColumn(num) {
+    const row = 0;
+    const column = 0;
+    const cell = [];
+    switch (num){
+        case num <= 2:
+            row = 0;
+            column = num;           
+        case num > 2 && num <= 5:
+            row = 1;
+            column = num - 3;
+        case num > 5:
+            row = 2;
+            column = num - 6;
+            
+    }
+    cell.push(row);
+    cell.push(column);
 
+    return cell;
+
+}
+const boardContainer = document.querySelector(".container");
+
+boardContainer.addEventListener("click", function(e) {
+
+})
