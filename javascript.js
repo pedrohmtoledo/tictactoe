@@ -1,5 +1,8 @@
 // first create the board. it is a 3x3 cells, each cell hast a row number and a column number
 
+const boardContainer = document.querySelector(".container");
+const buttons = document.querySelectorAll("button");
+
 function gameBoard() {
     const size = 3
     const board =[];
@@ -16,7 +19,6 @@ function gameBoard() {
  
 };
 
-console.log(gameBoard())
 // function to create a player
 function createPlayer(player1 = "player1", player2 = "player2"){
     const players = [
@@ -43,7 +45,6 @@ function createPlayer(player1 = "player1", player2 = "player2"){
 function playerMove(token, choice, board){
     if(board[choice[0]][choice[1]] === 0){
         board[choice[0]].splice(choice[1], 1, token)
-        console.log(board)
         return board;
     }
     else {
@@ -54,23 +55,27 @@ function playerMove(token, choice, board){
 
 // function to check for a winner
 function checkForWinner(board) {
+    let winner;
     for(let i = 0; i < board.length; i++){
+        console.log(board[i]);
         if(board[i][0] === board[i][1] && board[i][0] === board[i][2] && board[i][0] != 0){
-            return true;
+            winner = true;
         }
         else if(board[0][i] === board[1][i] && board[0][i] === board[2][i] && board[0][i] != 0){
-            return true;
+            winner = true;
         }
         else if(board[0][0] === board[1][1] && board[0][0] === board[2][2] && board[0][0] != 0){
-            return true;
+            winner = true;
         }
         else if(board[2][0] === board[1][1] && board[2][0] === board[0][2] && board[0][2] != 0){
-            return true;
+            rwinner = true;
         }
         else {
-            return false;
+            winner = false;
+            
         }
     }
+    return winner;
 }
 
 
@@ -105,25 +110,21 @@ function gameControl() {
     
     activePlayer = playersTurn(players.players[0], players.players[1]);
 
-    const boardContainer = document.querySelector(".container");
-    const buttons = document.querySelectorAll("button");
 
     buttons.forEach((e) => {e.addEventListener("click", (e) => 
         {
         e.target.innerText = activePlayer.getActivePlayer().token;
         
-        console.log(idToRowColumn(3))
-        console.log(typeof(parseInt(e.target.id)))
         let cell = idToRowColumn(parseInt(e.target.id));
-        console.log(cell)
+        
         playerMove(activePlayer.getActivePlayer().token, cell, board);
-        console.log(isMoveAvailable(board));
+        
         
 
         if(checkForWinner(board)){
-            gameOver(activePlayer.getActivePlayer().name);
+            gameOver(activePlayer.getActivePlayer().name, board);;
         } else if (!isMoveAvailable(board)){
-            gameOver()
+            gameOver("tie", board);
         }
 
         activePlayer.changeActivePlayer();
@@ -132,10 +133,7 @@ function gameControl() {
         
 };
 gameControl();
-// eventlistener when a cell is clicked, get that cell row and columns and place on players move funciton
 
-
-// create a function to transfor id number in column and row
 
 function idToRowColumn(num) {
     let row = 0;
@@ -159,22 +157,36 @@ function idToRowColumn(num) {
     return cell;
 }
 
-function gameOver(player = "tie") {
+function gameOver(player = "tie", board) {
     if(player != "tie"){
         alert(`${player} won`);
         let newBoard = gameBoard();
+        console.log(newBoard)
         board = newBoard;
-        console.log(board);
+        clearBoard()
+        
     } else {
         alert("game is a tie");
-        board = gameBoard();
+        let newBoard = gameBoard();
+        console.log(newBoard);
+        board = newBoard;
+        clearBoard()
+        
+    }
+    return board;
+
+}
+
+function isMoveAvailable(board) {
+    for (let i = 0; i < board.length; i++){
+        if (board[i].includes(0))
+        return true;
     }
 
 }
 
-function isMoveAvailable(array) {
-    for (let i = 0; i < array.length; i++) {
-        return array[i].includes(0);
-    }
-
+function clearBoard() {
+    buttons.forEach((button) => {
+        button.innerText = "";
+    })
 }
