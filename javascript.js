@@ -11,6 +11,7 @@ function gameBoard() {
             board[i].push(0);
         }
     }
+
     return board
  
 };
@@ -55,31 +56,23 @@ function playerMove(token, choice, board){
 function checkForWinner(board) {
     for(let i = 0; i < board.length; i++){
         if(board[i][0] === board[i][1] && board[i][0] === board[i][2] && board[i][0] != 0){
-            return board[i][0];
+            return true;
         }
         else if(board[0][i] === board[1][i] && board[0][i] === board[2][i] && board[0][i] != 0){
-            return board[0][i];
+            return true;
         }
         else if(board[0][0] === board[1][1] && board[0][0] === board[2][2] && board[0][0] != 0){
-            return board[0][0];
+            return true;
         }
         else if(board[2][0] === board[1][1] && board[2][0] === board[0][2] && board[0][2] != 0){
-            return board[0][0];
+            return true;
         }
         else {
-            return false
+            return false;
         }
     }
 }
 
-function choice(row, column) {
-    let cell = [];
-
-    cell.push(row);
-    cell.push(column);
-
-    return cell;
-}
 
 // this function is responsible for changings turns and get which players has to play
 function playersTurn(pl1, pl2){
@@ -105,58 +98,83 @@ function playersTurn(pl1, pl2){
 
 
 
-const ticTacToe = (function gameControl() {
+function gameControl() {
     let board = gameBoard();
    
     const players = createPlayer()
     
     activePlayer = playersTurn(players.players[0], players.players[1]);
 
-    while(!checkForWinner(board)){
-        let row;
-        let column;
-        row = parseInt(prompt(`${activePlayer.getActivePlayer().name} chose a row`));
-        column = parseInt(prompt(`${activePlayer.getActivePlayer().name} chose a columns`));
+    const boardContainer = document.querySelector(".container");
+    const buttons = document.querySelectorAll("button");
 
-        cell = choice(row, column);
-
+    buttons.forEach((e) => {e.addEventListener("click", (e) => 
+        {
+        e.target.innerText = activePlayer.getActivePlayer().token;
+        
+        console.log(idToRowColumn(3))
+        console.log(typeof(parseInt(e.target.id)))
+        let cell = idToRowColumn(parseInt(e.target.id));
+        console.log(cell)
         playerMove(activePlayer.getActivePlayer().token, cell, board);
+        console.log(isMoveAvailable(board));
+        
 
-        checkForWinner(board);
+        if(checkForWinner(board)){
+            gameOver(activePlayer.getActivePlayer().name);
+        } else if (!isMoveAvailable(board)){
+            gameOver()
+        }
 
         activePlayer.changeActivePlayer();
-    }
-});
-
+        
+        })})
+        
+};
+gameControl();
 // eventlistener when a cell is clicked, get that cell row and columns and place on players move funciton
 
 
 // create a function to transfor id number in column and row
 
 function idToRowColumn(num) {
-    const row = 0;
-    const column = 0;
-    const cell = [];
-    switch (num){
-        case num <= 2:
-            row = 0;
-            column = num;           
-        case num > 2 && num <= 5:
-            row = 1;
-            column = num - 3;
-        case num > 5:
-            row = 2;
-            column = num - 6;
-            
-    }
+    let row = 0;
+    let column = 0;
+    let cell = [];
+    if(num <= 2) {
+        row = 0;
+        column = num; 
+    } else if (num <= 5){
+        row = 1;
+        column = num - 3;
+
+    } else {
+        row = 2;
+        column = num - 6;
+    }                             
+    
     cell.push(row);
     cell.push(column);
 
     return cell;
+}
+
+function gameOver(player = "tie") {
+    if(player != "tie"){
+        alert(`${player} won`);
+        let newBoard = gameBoard();
+        board = newBoard;
+        console.log(board);
+    } else {
+        alert("game is a tie");
+        board = gameBoard();
+    }
 
 }
-const boardContainer = document.querySelector(".container");
 
-boardContainer.addEventListener("click", function(e) {
+function isMoveAvailable(array) {
+    for (let i = 0; i < array.length; i++) {
+        return array[i].includes(0);
+    }
 
-})
+}
