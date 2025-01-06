@@ -54,22 +54,24 @@ function playerMove(token, choice, board){
 }
 
 // function to check for a winner
+
 function checkForWinner(board) {
     let winner;
     for(let i = 0; i < board.length; i++){
         console.log(board[i]);
-        if(board[i][0] === board[i][1] && board[i][0] === board[i][2] && board[i][0] != 0){
+        if (board[i][0] === board[i][1] && board[i][0] === board[i][2] && board[i][0] != 0){
             winner = true;
-        }
-        else if(board[0][i] === board[1][i] && board[0][i] === board[2][i] && board[0][i] != 0){
+            break;
+        } else if(board[0][i] === board[1][i] && board[0][i] === board[2][i] && board[0][i] != 0){
             winner = true;
-        }
-        else if(board[0][0] === board[1][1] && board[0][0] === board[2][2] && board[0][0] != 0){
+            break;
+        } else if(board[0][0] === board[1][1] && board[0][0] === board[2][2] && board[0][0] != 0){
             winner = true;
-        }
-        else if(board[2][0] === board[1][1] && board[2][0] === board[0][2] && board[0][2] != 0){
-            rwinner = true;
-        }
+            break;
+        } else if(board[2][0] === board[1][1] && board[2][0] === board[0][2] && board[0][2] != 0){
+            winner = true;
+            break;
+        } 
         else {
             winner = false;
             
@@ -109,6 +111,7 @@ function gameControl() {
     const players = createPlayer()
     
     activePlayer = playersTurn(players.players[0], players.players[1]);
+    console.log(board);
 
 
     buttons.forEach((e) => {e.addEventListener("click", (e) => 
@@ -119,7 +122,7 @@ function gameControl() {
         
         playerMove(activePlayer.getActivePlayer().token, cell, board);
         
-        
+        console.log(board);
 
         if(checkForWinner(board)){
             gameOver(activePlayer.getActivePlayer().name, board);;
@@ -160,18 +163,11 @@ function idToRowColumn(num) {
 function gameOver(player = "tie", board) {
     if(player != "tie"){
         alert(`${player} won`);
-        let newBoard = gameBoard();
-        console.log(newBoard)
-        board = newBoard;
         clearBoard()
         
     } else {
         alert("game is a tie");
-        let newBoard = gameBoard();
-        console.log(newBoard);
-        board = newBoard;
-        clearBoard()
-        
+        clearBoard()  
     }
     return board;
 
@@ -186,7 +182,13 @@ function isMoveAvailable(board) {
 }
 
 function clearBoard() {
+    const newBoard = gameBoard();
+    board = newBoard;
     buttons.forEach((button) => {
         button.innerText = "";
     })
 }
+
+
+
+
