@@ -1,8 +1,10 @@
-// first create the board. it is a 3x3 cells, each cell hast a row number and a column number
-
 const boardContainer = document.querySelector(".container");
 const buttons = document.querySelectorAll("button");
+let winnerStatus = false;
+let board;
+let activePlayer;
 
+// create a new board
 function gameBoard() {
     const size = 3
     const board =[];
@@ -14,21 +16,21 @@ function gameBoard() {
             board[i].push(0);
         }
     }
-
     return board
- 
 };
 
-// function to create a player
+//function to create a player
 function createPlayer(player1 = "player1", player2 = "player2"){
     const players = [
         {
             name: player1,
-            token: "X"
+            token: 1,
+            mark: "X"
         },
         {
             name: player2,
-            token: "O"
+            token: 2,
+            mark: "O"
         }
     ]
 
@@ -41,47 +43,36 @@ function createPlayer(player1 = "player1", player2 = "player2"){
 
 
 
-// update players moves to the board
+//update players moves to the board
 function playerMove(token, choice, board){
     if(board[choice[0]][choice[1]] === 0){
-        board[choice[0]].splice(choice[1], 1, token)
-        return board;
+        board[choice[0]][choice[1]] = token;
     }
-    else {
-        return; //implement code for not allowing same spot choice
-    }
-
+    return board   
 }
 
-// function to check for a winner
+//function to check for a winner
 
 function checkForWinner(board) {
-    let winner;
     for(let i = 0; i < board.length; i++){
-        console.log(board[i]);
         if (board[i][0] === board[i][1] && board[i][0] === board[i][2] && board[i][0] != 0){
-            winner = true;
-            break;
+            return true;
         } else if(board[0][i] === board[1][i] && board[0][i] === board[2][i] && board[0][i] != 0){
-            winner = true;
-            break;
-        } else if(board[0][0] === board[1][1] && board[0][0] === board[2][2] && board[0][0] != 0){
-            winner = true;
-            break;
-        } else if(board[2][0] === board[1][1] && board[2][0] === board[0][2] && board[0][2] != 0){
-            winner = true;
-            break;
+            return true;
         } 
-        else {
-            winner = false;
-            
-        }
     }
-    return winner;
+    if (board[0][0] === board[1][1] && board[0][0] === board[2][2] && board[0][0] != 0){
+            return true;
+    } 
+    if (board[2][0] === board[1][1] && board[2][0] === board[0][2] && board[0][2] != 0){
+        return true;
+    } 
+        
+    return false;                  
 }
 
 
-// this function is responsible for changings turns and get which players has to play
+//this function is responsible for changings turns and get which players has to play
 function playersTurn(pl1, pl2){
     let activePlayer = pl1;
     let player1 = pl1;
@@ -98,46 +89,14 @@ function playersTurn(pl1, pl2){
     const getActivePlayer = () => {
         return activePlayer;
     };
+    const resetPlayer = () => {
+        activePlayer = pl1;
+    }
 
-    return {getActivePlayer, changeActivePlayer}
+    return {getActivePlayer, changeActivePlayer, resetPlayer}
 
 }
-
-
-
-function gameControl() {
-    let board = gameBoard();
-   
-    const players = createPlayer()
-    
-    activePlayer = playersTurn(players.players[0], players.players[1]);
-    console.log(board);
-
-
-    buttons.forEach((e) => {e.addEventListener("click", (e) => 
-        {
-        e.target.innerText = activePlayer.getActivePlayer().token;
-        
-        let cell = idToRowColumn(parseInt(e.target.id));
-        
-        playerMove(activePlayer.getActivePlayer().token, cell, board);
-        
-        console.log(board);
-
-        if(checkForWinner(board)){
-            gameOver(activePlayer.getActivePlayer().name, board);;
-        } else if (!isMoveAvailable(board)){
-            gameOver("tie", board);
-        }
-
-        activePlayer.changeActivePlayer();
-        
-        })})
-        
-};
-gameControl();
-
-
+// get the id of the button clicked and transform it to a cell array with values of row and column
 function idToRowColumn(num) {
     let row = 0;
     let column = 0;
@@ -160,35 +119,78 @@ function idToRowColumn(num) {
     return cell;
 }
 
-function gameOver(player = "tie", board) {
+// when game is over pop a message and reset game
+function gameOver(player = "tie") {
     if(player != "tie"){
         alert(`${player} won`);
-        clearBoard()
-        
+           
     } else {
         alert("game is a tie");
-        clearBoard()  
+           
     }
-    return board;
-
+    resetGame();
+    
 }
 
+// check if a move is avaiable to prevent same spot placing this still has to be implemented better
 function isMoveAvailable(board) {
     for (let i = 0; i < board.length; i++){
-        if (board[i].includes(0))
-        return true;
+        if (board[i].includes(0)){
+            return true;
+        }
     }
-
 }
 
-function clearBoard() {
-    const newBoard = gameBoard();
-    board = newBoard;
+
+function resetGame(){
     buttons.forEach((button) => {
         button.innerText = "";
     })
+    winnerStatus = false;
+    board = gameBoard();
+    activePlayer.resetPlayer();
+
 }
 
+function gameControl() {
+    board = gameBoard();
+    const players = createPlayer();
+    activePlayer = playersTurn(players.players[0], players.players[1]);
+
+    function playGame(e) {
+        if (winnerStatus || !isMoveAvailable(board)) {
+            return; 
+        }
+        e.target.innerText = activePlayer.getActivePlayer().mark;
+
+        let cell = idToRowColumn(parseInt(e.target.id));
+
+        if (board[cell[0]][cell[1]] !== 0) {
+            return; 
+        }
+
+        playerMove(activePlayer.getActivePlayer().token, cell, board);
+
+        winnerStatus = checkForWinner(board);
+        
+        if (winnerStatus) {
+            gameOver(activePlayer.getActivePlayer().name, board);
+            resetGame();
+        } else if (!isMoveAvailable(board)) {
+            gameOver("tie", board);
+            resetGame();
+        } else {
+            activePlayer.changeActivePlayer();
+        }
+    }
+
+    // Attach event listeners to buttons
+    buttons.forEach((button) => {
+        button.addEventListener("click", playGame);
+    });
+}
+
+gameControl()
 
 
 
