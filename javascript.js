@@ -1,5 +1,8 @@
-const boardContainer = document.querySelector(".container");
-const buttons = document.querySelectorAll("button");
+const boardContainer = document.querySelector(".board");
+const buttons = document.querySelectorAll(".cell");
+const playButton = document.querySelector(".play");
+const firstPlayerScore = document.querySelector("#player1");
+const secondPlayerScore = document.querySelector("#player2");
 let winnerStatus = false;
 let board;
 let activePlayer;
@@ -25,20 +28,20 @@ function createPlayer(player1 = "player1", player2 = "player2"){
         {
             name: player1,
             token: 1,
-            mark: "X"
+            mark: "X",
+            score: 0
         },
         {
             name: player2,
             token: 2,
-            mark: "O"
+            mark: "O",
+            score: 0
         }
     ]
 
-    const getName = (i) => {return players[i].name};
 
-    const getToken = (i) => {return players[i].token};
 
-    return { players, getToken, getName}
+    return { players }
 };
 
 
@@ -75,8 +78,8 @@ function checkForWinner(board) {
 //this function is responsible for changings turns and get which players has to play
 function playersTurn(pl1, pl2){
     let activePlayer = pl1;
-    let player1 = pl1;
-    let player2 = pl2;
+    const player1 = pl1;
+    const player2 = pl2;
     
     const changeActivePlayer = () => {
         if(activePlayer === player1) {
@@ -92,8 +95,11 @@ function playersTurn(pl1, pl2){
     const resetPlayer = () => {
         activePlayer = pl1;
     }
+    const incrementScore = () => {
+        activePlayer.score++
+    }
 
-    return {getActivePlayer, changeActivePlayer, resetPlayer}
+    return {getActivePlayer, changeActivePlayer, resetPlayer, incrementScore}
 
 }
 // get the id of the button clicked and transform it to a cell array with values of row and column
@@ -120,15 +126,24 @@ function idToRowColumn(num) {
 }
 
 // when game is over pop a message and reset game
-function gameOver(player = "tie") {
-    if(player != "tie"){
-        alert(`${player} won`);
+function roundOver(player = "tie", players) {
+    console.log(players)
+    if(player.getActivePlayer().name != "tie"){
+        alert(`${player.getActivePlayer().name} won`);
+        if (player.getActivePlayer().name === players.players[0].name){
+            firstPlayerScore.innerText = `Player 1 score: ${players.players[0].score}`
+        } else {
+            secondPlayerScore.innerText = `Player 2 score: ${players.players[1].score}`
+        }
            
     } else {
         alert("game is a tie");
            
     }
-    resetGame();
+    if (player.getActivePlayer().score === 3){
+        gameEnd(players);
+    }
+    resetGame(); 
     
 }
 
@@ -148,7 +163,15 @@ function resetGame(){
     })
     winnerStatus = false;
     board = gameBoard();
-    activePlayer.resetPlayer();
+    activePlayer.changeActivePlayer();
+     
+}
+
+function gameEnd(players) {
+    players.players[0].score = 0;
+    players.players[1].score = 0;
+    firstPlayerScore.innerText = `Player 1 score: 0`;
+    secondPlayerScore.innerText = `Player 2 score: 0`;
 
 }
 
@@ -156,41 +179,50 @@ function gameControl() {
     board = gameBoard();
     const players = createPlayer();
     activePlayer = playersTurn(players.players[0], players.players[1]);
+    
 
     function playGame(e) {
         if (winnerStatus || !isMoveAvailable(board)) {
             return; 
         }
-        e.target.innerText = activePlayer.getActivePlayer().mark;
 
         let cell = idToRowColumn(parseInt(e.target.id));
 
         if (board[cell[0]][cell[1]] !== 0) {
+            console.log(board)
             return; 
         }
+        e.target.innerText = activePlayer.getActivePlayer().mark;
+
+        
 
         playerMove(activePlayer.getActivePlayer().token, cell, board);
 
         winnerStatus = checkForWinner(board);
         
         if (winnerStatus) {
-            gameOver(activePlayer.getActivePlayer().name, board);
-            resetGame();
+           
+            activePlayer.incrementScore();
+            roundOver(activePlayer, players);
         } else if (!isMoveAvailable(board)) {
-            gameOver("tie", board);
-            resetGame();
+            activePlayer.incrementScore();
+            roundOver("", players); 
         } else {
+            
             activePlayer.changeActivePlayer();
+            
         }
-    }
 
-    // Attach event listeners to buttons
+    }
+    
+
     buttons.forEach((button) => {
         button.addEventListener("click", playGame);
     });
 }
 
-gameControl()
+playButton.addEventListener("click", gameControl)
+
 
 
 
