@@ -3,6 +3,7 @@ const buttons = document.querySelectorAll(".cell");
 const playButton = document.querySelector(".play");
 const firstPlayerScore = document.querySelector("#player1");
 const secondPlayerScore = document.querySelector("#player2");
+const turn = document.querySelector("#turn");
 let winnerStatus = false;
 let board;
 let activePlayer;
@@ -139,6 +140,10 @@ function roundOver(player, players) {
             secondPlayerScore.innerText = `Player 2 score: ${players.players[1].score}`
         }
         if (player.getActivePlayer().score === 3){
+            playButton.classList.remove("display");
+            turn.classList.add("display");
+            secondPlayerScore.classList.add("display");
+            firstPlayerScore.classList.add("display");
             resetGame();
             winnerStatus = true;
             gameEnd(players);
@@ -188,9 +193,14 @@ function gameControl() {
     board = gameBoard();
     const players = createPlayer();
     activePlayer = playersTurn(players.players[0], players.players[1]);
-    let status = false;
-    
+    turn.innerText = `Turn: ${activePlayer.getActivePlayer().name}`;
 
+    
+    turn.classList.remove("display");
+    secondPlayerScore.classList.remove("display");
+    firstPlayerScore.classList.remove("display");
+    playButton.classList.add("display")
+    
     function playGame(e) {
         if (winnerStatus || !isMoveAvailable(board)) {
             return; 
@@ -202,6 +212,7 @@ function gameControl() {
             console.log(board)
             return; 
         }
+        turn.innerText = `Turn: ${activePlayer.getActivePlayer().name}`
         e.target.innerText = activePlayer.getActivePlayer().mark;
 
         
