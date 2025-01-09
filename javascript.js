@@ -126,23 +126,27 @@ function idToRowColumn(num) {
 }
 
 // when game is over pop a message and reset game
-function roundOver(player = "tie", players) {
-    console.log(players)
-    if(player.getActivePlayer().name != "tie"){
+function roundOver(player, players) {
+    if (player === "tie") {
+        alert("game is a tie");
+        
+    } else {
         alert(`${player.getActivePlayer().name} won`);
         if (player.getActivePlayer().name === players.players[0].name){
+            console.log("test")
             firstPlayerScore.innerText = `Player 1 score: ${players.players[0].score}`
         } else {
             secondPlayerScore.innerText = `Player 2 score: ${players.players[1].score}`
         }
-           
-    } else {
-        alert("game is a tie");
-           
+        if (player.getActivePlayer().score === 3){
+            resetGame();
+            winnerStatus = true;
+            gameEnd(players);
+            return;
+        }
+        
     }
-    if (player.getActivePlayer().score === 3){
-        gameEnd(players);
-    }
+    
     resetGame(); 
     
 }
@@ -172,13 +176,19 @@ function gameEnd(players) {
     players.players[1].score = 0;
     firstPlayerScore.innerText = `Player 1 score: 0`;
     secondPlayerScore.innerText = `Player 2 score: 0`;
+ 
 
 }
 
 function gameControl() {
+    if (winnerStatus) {
+        resetGame();
+        return;
+    }
     board = gameBoard();
     const players = createPlayer();
     activePlayer = playersTurn(players.players[0], players.players[1]);
+    let status = false;
     
 
     function playGame(e) {
@@ -201,18 +211,15 @@ function gameControl() {
         winnerStatus = checkForWinner(board);
         
         if (winnerStatus) {
-           
             activePlayer.incrementScore();
-            roundOver(activePlayer, players);
+            status = roundOver(activePlayer, players);
         } else if (!isMoveAvailable(board)) {
-            activePlayer.incrementScore();
-            roundOver("", players); 
+            roundOver("tie", activePlayer); 
         } else {
             
-            activePlayer.changeActivePlayer();
-            
+            activePlayer.changeActivePlayer(); 
         }
-
+       
     }
     
 
@@ -221,7 +228,7 @@ function gameControl() {
     });
 }
 
-playButton.addEventListener("click", gameControl)
+playButton.addEventListener("click", gameControl);
 
 
 
